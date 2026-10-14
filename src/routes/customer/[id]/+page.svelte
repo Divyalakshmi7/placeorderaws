@@ -13,11 +13,7 @@
 	let activeTab = $state('orders'); // 'orders' | 'customers'
 
 	// Seed customers for navigation
-	let customersList = $state([
-		{ id: '1', code: 'C001', name: 'Divyalak', email: 'divya@gmail.com', phone: '988123741', status: 'Active', date: '2026-10-01' },
-		{ id: 'b2535d22-4788-41bb-be01-9e8b2360d61e', code: 'C002', name: 'Alice Johnson', email: 'alice@example.com', phone: '9876543210', status: 'Active', date: '2026-10-03' },
-		{ id: '28cbe4fc-1660-4799-820b-26d664cf86d8', code: 'C003', name: 'Bob Smith', email: 'bob@example.com', phone: '9876543211', status: 'Active', date: '2026-10-05' }
-	]);
+	let customersList = $state([]);
 
 	// Customer's orders
 	let ordersList = $state([]);

@@ -115,7 +115,7 @@
 				});
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.message || data.error || 'Failed to create product');
-				message = `Product created successfully (POST).`;
+				message = `Product created successfully.`;
 			}
 			resetForm();
 			await fetchProducts();
@@ -155,9 +155,6 @@
 	<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
 		<div>
 			<h1 style="margin: 0 0 4px 0; font-size: 24px; color: #111827;">Products Catalog</h1>
-			<p style="color: #6b7280; margin: 0; font-size: 14px;">
-				Supported API Methods: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code> &bull; AWS Integrated
-			</p>
 		</div>
 		<div>
 			<button class="btn-secondary" onclick={fetchProducts}>↻ Refresh List</button>
@@ -176,7 +173,7 @@
 <div class="card">
 	<div class="form-header">
 		<h2 style="margin: 0; font-size: 18px;">
-			{isEditing ? 'Edit Product (PUT /api/products/[id])' : 'Add New Product (POST /api/products)'}
+			{isEditing ? 'Edit Product' : 'Add New Product'}
 		</h2>
 		<p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Fill in the product pricing, points and media info.</p>
 	</div>
@@ -254,7 +251,7 @@
 
 		<div style="margin-top: 18px; display: flex; gap: 10px;">
 			<button type="submit" class="btn-primary">
-				{isEditing ? 'Save Changes (PUT)' : 'Create Product (POST)'}
+				{isEditing ? 'Save Changes' : 'Create Product'}
 			</button>
 			{#if isEditing}
 				<button type="button" class="btn-secondary" onclick={resetForm}>Cancel</button>

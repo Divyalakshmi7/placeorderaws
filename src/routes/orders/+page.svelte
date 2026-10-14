@@ -11,7 +11,7 @@
 	// Order form state
 	let selectedCustomerId = $state('');
 	let orderLines = $state([
-		{ productId: '', quantity: 1 }
+		{ ProductId: '', quantity: 1, totalPrice: 0 , totalPoints: 0 }
 	]);
 
 	// Filter state for orders list
@@ -44,19 +44,19 @@
 				fetch('/api/products'),
 				fetch('/api/orders')
 			]);
-			const cData = await cRes.json();
-			const pData = await pRes.json();
-			const oData = await oRes.json();
+			const custData = await cRes.json();
+			const productData = await pRes.json();
+			const orderData = await oRes.json();
 
-			customers = parseList(cData, 'customers');
-			products = parseList(pData, 'products');
-			orders = Array.isArray(oData) ? oData : parseList(oData, 'orders');
+			customers = JSON.parse(custData.body).customers ;
+			products  = JSON.parse(productData.body).products ;
+			orders = JSON.parse(orderData.body).orders;
 
 			if (customers.length > 0 && !selectedCustomerId) {
 				selectedCustomerId = customers[0].CustomerId || customers[0].customerId;
 			}
-			if (products.length > 0 && (!orderLines[0]?.productId || orderLines[0]?.productId === '')) {
-				orderLines[0].productId = products[0].ProductId || products[0].productId;
+			if (products.length > 0 && (!orderLines[0]?.ProductId || orderLines[0]?.ProductId === '')) {
+				orderLines[0].ProductId = products[0].ProductId;
 			}
 		} catch (e) {
 			error = e.message;
@@ -80,8 +80,8 @@
 	}
 
 	function addOrderLine() {
-		const defaultProdId = products.length > 0 ? (products[0].ProductId || products[0].productId || '') : '';
-		orderLines = [...orderLines, { productId: defaultProdId, quantity: 1 }];
+		const defaultProdId = products.length > 0 ? (products[0].ProductId || '') : '';
+		orderLines = [...orderLines, { ProductId: defaultProdId, quantity: 1, totalPrice: products[0].price, totalPoints: products[0].points}];
 	}
 
 	function removeOrderLine(index) {
@@ -93,10 +93,10 @@
 		if (!Array.isArray(products) || products.length === 0) {
 			return { unitPrice: 0, unitPoints: 0, totalPrice: '0.00', totalPoints: 0 };
 		}
-		const prod = products.find((p) => (p.productId === line.productId || p.ProductId === line.productId));
+		const prod = products.find((p) => (p.ProductId === line.ProductId));
 		const qty = Number(line.quantity) || 0;
 		if (!prod) return { unitPrice: 0, unitPoints: 0, totalPrice: '0.00', totalPoints: 0 };
-		const price = Number(prod.amount ?? prod.price ?? 0);
+		const price = Number(prod.price);
 		const points = Number(prod.points ?? 0);
 		return {
 			unitPrice: price,
@@ -137,10 +137,16 @@
 
 		try {
 			const payload = {
-				customerId: selectedCustomerId,
+				CustomerId: selectedCustomerId,
+				OrderId: `ord-${Math.random().toString(36).substring(2, 10)}`,
+				OrderDate:  new Date(),
+				OrderAmount:orderTotals.amount,
+				TotalPoints:orderTotals.points,
 				items: orderLines.map((l) => ({
-					productId: l.productId,
-					quantity: Number(l.quantity)
+					ProductId: l.ProductId,
+					quantity: Number(l.quantity),
+					totalPrice: l.totalPrice,
+					totalPoints: l.totalPoints
 				}))
 			};
 
@@ -153,11 +159,10 @@
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || 'Failed to place order');
 
-			message = `Order placed successfully! Order ID: ${data.order.orderId}. Customer earned ${data.order.totalPoints} points (New Points Balance: ${data.customerNewBalance}).`;
+			message = `Order placed successfully! Order ID: ${JSON.parse(data.body).data.OrderId}. Customer earned ${JSON.parse(data.body).data.TotalPoints} points`;
 
 			// Reset line items
-			orderLines = [{ productId: products[0]?.productId || products[0]?.ProductId || '', quantity: 1 }];
-			
+			orderLines = [{ ProductId: products[0]?.ProductId || '', quantity: 1, totalPrice: products[0].price, totalPoints: products[0].points }];
 			// Refresh orders & customers list
 			await loadInitialData();
 		} catch (e) {
@@ -178,9 +183,6 @@
 	<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
 		<div>
 			<h1 style="margin: 0 0 4px 0; font-size: 24px; color: #111827;">Bulk Orders Management</h1>
-			<p style="color: #6b7280; margin: 0; font-size: 14px;">
-				Supported API Methods: <code>GET</code>, <code>POST</code> &bull; Creates Order Header and Order Details line items
-			</p>
 		</div>
 		<div>
 			<button class="btn-secondary" onclick={loadInitialData}>↻ Refresh All</button>
@@ -198,7 +200,7 @@
 <!-- Bulk Order Placement Form -->
 <div class="card">
 	<div style="margin-bottom: 20px;">
-		<h2 style="margin: 0; font-size: 18px;">Place New Bulk Order (POST /api/orders)</h2>
+		<h2 style="margin: 0; font-size: 18px;">Place New Bulk Order</h2>
 		<p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Add line items with quantities. Points and total amounts calculate automatically.</p>
 	</div>
 
@@ -242,11 +244,11 @@
 						<tr>
 							<td style="color: #9ca3af; font-weight: 600;">{idx + 1}</td>
 							<td>
-								<select bind:value={line.productId}>
+								<select bind:value={line.ProductId}>
 									{#each products as p}
 										{@const id = p.ProductId || p.productId}
 										<option value={id}>
-											{p.name} ({id}) - ${p.amount ?? p.price} / {p.points ?? 0} pts
+											{p.name} 
 										</option>
 									{/each}
 								</select>
@@ -297,7 +299,7 @@
 
 		<div style="margin-top: 20px; display: flex; gap: 12px;">
 			<button type="submit" class="btn-primary" style="padding: 12px 24px;">
-				Submit Bulk Order (POST)
+				Submit Bulk Order
 			</button>
 		</div>
 	</form>
@@ -325,16 +327,16 @@
 	{#if orders.length === 0}
 		<p style="padding: 20px; color: #6b7280; text-align: center;">No orders found.</p>
 	{:else}
-		{#each orders as o (o.orderId)}
-			{@const cust = customers.find((c) => (c.customerId === o.customerId || c.CustomerId === o.customerId))}
+		{#each orders as o (o.OrderId)}
+			{@const cust = customers.find((c) => (c.CustomerId === o.CustomerId))}
 			<div class="order-box">
 				<div class="order-header-bar">
 					<div style="display: flex; align-items: center; gap: 12px;">
-						<strong style="color: #111827; font-size: 15px;">Order #{o.orderId}</strong>
-						<span style="color: #6b7280; font-size: 13px;">{new Date(o.orderDate).toLocaleString()}</span>
+						<strong style="color: #111827; font-size: 15px;">Order #{o.OrderId}</strong>
+						<span style="color: #6b7280; font-size: 13px;">{new Date(o.OrderDate).toLocaleString()}</span>
 					</div>
 					<div>
-						<span>Customer: <strong style="color: #2563eb;">{cust ? cust.name : o.customerId}</strong></span>
+						<span>Customer: <strong style="color: #2563eb;">{cust ? cust.name : o.CustomerId}</strong></span>
 					</div>
 				</div>
 
@@ -348,24 +350,20 @@
 									<th style="width: 50px;">Line</th>
 									<th>Product Id / Item</th>
 									<th style="width: 90px; text-align: right;">Quantity</th>
-									<th style="width: 100px; text-align: right;">Unit Price</th>
-									<th style="width: 100px; text-align: right;">Unit Points</th>
 									<th style="width: 110px; text-align: right;">Line Total</th>
 									<th style="width: 110px; text-align: right;">Line Points</th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each o.items || [] as item}
-									{@const p = products.find((x) => (x.productId === item.productId || x.ProductId === item.productId))}
+									{@const p = products.find((x) => (x.ProductId === item.ProductId))}
 									<tr>
-										<td>#{item.orderLineId}</td>
+										<td>#{item.OrderLineId}</td>
 										<td>
-											<strong>{item.productId}</strong>
+											<strong>{item.ProductId}</strong>
 											{#if p} <span style="color: #6b7280; font-size: 13px;">({p.name})</span>{/if}
 										</td>
 										<td style="text-align: right;">{item.quantity}</td>
-										<td style="text-align: right; color: #6b7280;">${Number(item.unitPrice).toFixed(2)}</td>
-										<td style="text-align: right; color: #6b7280;">{item.unitPoints} pts</td>
 										<td style="text-align: right; font-weight: 600; color: #059669;">${Number(item.totalPrice).toFixed(2)}</td>
 										<td style="text-align: right; font-weight: 600; color: #2563eb;">{item.totalPoints} pts</td>
 									</tr>
@@ -375,8 +373,8 @@
 					</div>
 
 					<div class="order-summary-footer">
-						<div>Order Amount: <span style="color: #059669; font-size: 16px; font-weight: 700;">${Number(o.orderAmount).toFixed(2)}</span></div>
-						<div>Points Earned: <span style="color: #2563eb; font-size: 16px; font-weight: 700;">{o.totalPoints} pts</span></div>
+						<div>Order Amount: <span style="color: #059669; font-size: 16px; font-weight: 700;">${Number(o.OrderAmount).toFixed(2)}</span></div>
+						<div>Points Earned: <span style="color: #2563eb; font-size: 16px; font-weight: 700;">{o.TotalPoints} pts</span></div>
 					</div>
 				</div>
 			</div>

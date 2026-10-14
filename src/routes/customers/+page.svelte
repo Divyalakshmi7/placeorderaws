@@ -122,7 +122,7 @@
 				});
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.message || data.error || 'Failed to create customer');
-				message = `Customer created successfully (POST).`;
+				message = `Customer created successfully.`;
 			}
 			resetForm();
 			await getAllCustomers();
@@ -161,10 +161,7 @@
 <div class="card">
 	<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
 		<div>
-			<h1 style="margin: 0 0 4px 0; font-size: 24px; color: #111827;">Customers Management</h1>
-			<p style="color: #6b7280; margin: 0; font-size: 14px;">
-				Supported API Methods: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code> &bull; AWS Integrated
-			</p>
+			<h1 style="margin: 0 0 4px 0; font-size: 24px; color: #111827;">Customers Management</h1>			
 		</div>
 		<div style="display: flex; gap: 10px;">
 			<a href="/register" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; padding: 9px 16px;">
@@ -186,7 +183,7 @@
 <div class="card">
 	<div class="form-header">
 		<h2 style="margin: 0; font-size: 18px;">
-			{isEditing ? 'Edit Customer (PUT /api/customers/[id])' : 'Add New Customer (POST /api/customers)'}
+			{isEditing ? 'Edit Customer' : 'Add New Customer'}
 		</h2>
 		<p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Customer profile with contact and location details.</p>
 	</div>
@@ -300,7 +297,7 @@
 
 		<div style="margin-top: 18px; display: flex; gap: 10px;">
 			<button type="submit" class="btn-primary">
-				{isEditing ? 'Save Changes (PUT)' : 'Create Customer (POST)'}
+				{isEditing ? 'Save Changes' : 'Create Customer'}
 			</button>
 			{#if isEditing}
 				<button type="button" class="btn-secondary" onclick={resetForm}>Cancel</button>
@@ -360,13 +357,13 @@
 							</td>
 							<td style="text-align: center;">
 								<div style="display: flex; gap: 6px; justify-content: center;">
-									<a
+									<!-- <a
 										href="/customer/{id}"
 										class="badge-link"
 										title="Open AWS Customer Dashboard"
 									>
 										Dashboard
-									</a>
+									</a> -->
 									<button onclick={() => handleEdit(c)}>Edit</button>
 									<button class="btn-danger" onclick={() => handleDelete(id)}>Delete</button>
 								</div>

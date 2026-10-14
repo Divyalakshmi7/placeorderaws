@@ -14,9 +14,6 @@
 			<a href="/products">Products</a>
 			<a href="/customers">Customers</a>
 			<a href="/orders">Orders (Bulk)</a>
-			<a href="/points">Points Wallet</a>
-			<a href="/customer/b2535d22-4788-41bb-be01-9e8b2360d61e">AWS Dashboard</a>
-			<a href="/register" class="nav-highlight">Create Account</a>
 		</nav>
 	</header>
 

@@ -122,9 +122,6 @@
 	<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
 		<div>
 			<h1 style="margin: 0 0 4px 0; font-size: 24px; color: #111827;">Points Wallet &amp; Balances</h1>
-			<p style="color: #6b7280; margin: 0; font-size: 14px;">
-				Supported API Methods: <code>GET</code>, <code>POST</code> &bull; Assign Points, Deduct Points and Balance check
-			</p>
 		</div>
 		<div>
 			<button class="btn-secondary" onclick={() => fetchCustomerBalance(selectedCustomerId)}>↻ Refresh Balance</button>
@@ -184,7 +181,7 @@
 	<!-- Transaction Form (POST) -->
 	<div class="card" style="margin-bottom: 0;">
 		<div style="margin-bottom: 16px;">
-			<h2 style="margin: 0; font-size: 18px;">2. Assign / Deduct Points (POST /api/points)</h2>
+			<h2 style="margin: 0; font-size: 18px;">2. Assign / Deduct Points</h2>
 			<p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Credit points as rewards or debit points for redemption.</p>
 		</div>
 
